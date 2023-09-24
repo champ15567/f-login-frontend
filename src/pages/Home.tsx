@@ -1,10 +1,14 @@
+//MUI
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
-import Header, { UserProfile } from "./components/Header";
-import Footer from "./components/Footer";
+
+//React and Other
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import { UserProfile } from "../interfaces/User";
 
 const defaultTheme = createTheme();
 

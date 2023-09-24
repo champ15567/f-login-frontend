@@ -1,4 +1,4 @@
-import * as React from "react";
+//MUI
 import { useTheme } from "@mui/material/styles";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -23,22 +23,24 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import Alert from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
-
-import { UserProfile } from "./components/Header";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import { useEffect, useState } from "react";
-import axios from "axios";
 import DialogContentText from "@mui/material/DialogContentText";
+import { AlertProps } from "@mui/material/Alert";
 
+//React and Other
+import * as React from "react";
+import { UserProfile } from "../interfaces/User";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import axios from "axios";
+import AlertComponent from "../components/AlertComponent";
+
+//Table
 interface TablePaginationActionsProps {
   count: number;
   page: number;
@@ -124,6 +126,7 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
     </Box>
   );
 }
+
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.common.black,
@@ -144,26 +147,23 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-interface AlertSeverity {
-  success: string;
-  error: string;
-}
+// End Table
+const defaultTheme = createTheme();
 
 export default function AdminHome() {
-  const defaultTheme = createTheme();
-
-  const profileJSON = localStorage.getItem("profile") ?? "{}";
-  const profile: UserProfile = JSON.parse(profileJSON);
-
-  const [usernameToDelete, setUsernameToDelete] = React.useState("");
-  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+  //Alert
   const [open, setOpen] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState<string[]>([]);
   const [alertSeverity, setAlertSeverity] =
-    React.useState<keyof AlertSeverity>("success");
+    React.useState<AlertProps["severity"]>("success");
   const handleAlertClose = () => {
     setOpen(false);
   };
+
+  //PopUp
+  const [usernameToDelete, setUsernameToDelete] = React.useState("");
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+
   const handleOpenDeleteDialog = (usernameToDelete: string) => {
     setUsernameToDelete(usernameToDelete);
     setOpenDeleteDialog(true);
@@ -172,10 +172,10 @@ export default function AdminHome() {
     setOpenDeleteDialog(false);
   };
 
+  //Pagination
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [rows, setRows] = useState<TableData[]>([]);
-
+  const [rows, setRows] = React.useState<TableData[]>([]);
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
@@ -193,8 +193,13 @@ export default function AdminHome() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+  //End pagination
 
-  useEffect(() => {
+  const profileJSON = localStorage.getItem("profile") ?? "{}";
+  const profile: UserProfile = JSON.parse(profileJSON);
+
+  //Get Data for table
+  React.useEffect(() => {
     axios({
       method: "get",
       url: "http://localhost:4000/users",
@@ -210,13 +215,16 @@ export default function AdminHome() {
         );
       })
       .catch((error: any) => {
-        console.error(error);
+        setAlertSeverity("error");
+        setAlertMessage([error.message]);
+        setOpen(true);
       });
   }, []);
 
   const handleDelete = () => {
     setOpenDeleteDialog(false);
 
+    //Validate cant delete youeself acc
     if (usernameToDelete === profile.username) {
       setAlertSeverity("error");
       setAlertMessage(["You can't delete yourself"]);
@@ -243,7 +251,7 @@ export default function AdminHome() {
       })
       .catch((error) => {
         setAlertSeverity("error");
-        setAlertMessage([error.message || "An error occurred"]);
+        setAlertMessage([error.message]);
         setOpen(true);
       });
   };
@@ -352,18 +360,7 @@ export default function AdminHome() {
             </TableFooter>
           </Table>
         </TableContainer>
-        <Snackbar
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          open={open}
-          autoHideDuration={3000}
-          onClose={handleAlertClose}
-        >
-          <Alert severity={alertSeverity} onClose={handleAlertClose}>
-            {alertMessage.map((message, index) => (
-              <div key={index}>{message}</div>
-            ))}
-          </Alert>
-        </Snackbar>
+
         <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
           <DialogTitle>Confirm Deletion</DialogTitle>
           <DialogContent>
@@ -382,7 +379,12 @@ export default function AdminHome() {
           </DialogActions>
         </Dialog>
       </Container>
-
+      <AlertComponent
+        open={open}
+        onClose={handleAlertClose}
+        severity={alertSeverity}
+        messages={alertMessage}
+      />
       <Footer />
     </ThemeProvider>
   );

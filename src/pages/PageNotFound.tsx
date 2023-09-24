@@ -1,5 +1,5 @@
 import { Box, Button, Typography } from "@mui/material";
-import { UserProfile } from "./components/Header";
+import { UserProfile } from "../interfaces/User";
 type Props = {};
 
 function PageNotFound({}: Props) {

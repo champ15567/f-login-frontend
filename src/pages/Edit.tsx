@@ -1,4 +1,4 @@
-import * as React from "react";
+//MUI
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -10,42 +10,36 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Footer from "./components/Footer";
-import axios from "axios";
-import Alert from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
-import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import { AlertProps } from "@mui/material/Alert";
+
+//React And Other
+import * as React from "react";
+import axios from "axios";
+import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import { ResEditUser } from "../interfaces/ApiData";
+import AlertComponent from "../components/AlertComponent";
 
 const defaultTheme = createTheme();
-export interface AlertSeverity {
-  success: string;
-  error: string;
-}
-export interface ResData {
-  status: string;
-  message: string;
-  token: string;
-  profile: {
-    username: string;
-    email: string;
-    role: string;
-  };
-}
 
 export default function Edit() {
-  const { username } = useParams();
+  //Alert
   const [open, setOpen] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState<string[]>([]);
   const [alertSeverity, setAlertSeverity] =
-    React.useState<keyof AlertSeverity>("success");
+    React.useState<AlertProps["severity"]>("success");
   const handleAlertClose = () => {
     setOpen(false);
   };
+
+  const { username } = useParams();
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -63,11 +57,6 @@ export default function Edit() {
         console.error("Error fetching user:", error);
       });
   }, [username]);
-
-  const handleChange = (event: any) => {
-    const { name, value } = event.target;
-    setFormData({ ...formData, [name]: value });
-  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -98,11 +87,13 @@ export default function Edit() {
         data: jsonData,
       });
 
-      const responseData: ResData = response.data;
+      const responseData: ResEditUser = response.data;
       if (responseData.status === "ok") {
+        //Alert
         setAlertSeverity("success");
         setAlertMessage([responseData.message]);
         setOpen(true);
+
         setTimeout(() => {
           window.location.href = "/adminhome";
         }, 500);
@@ -118,19 +109,24 @@ export default function Edit() {
         setOpen(true);
       } else {
         setAlertSeverity("error");
-        setAlertMessage(error);
+        setAlertMessage(error.message);
         setOpen(true);
       }
     }
   };
 
+  const handleChange = (event: any) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
   return (
     <ThemeProvider theme={defaultTheme}>
+      <Header />
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
           sx={{
-            marginTop: 8,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -151,13 +147,13 @@ export default function Edit() {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
-                  disabled
-                  autoComplete="username"
+                  id="username"
                   name="username"
+                  label="Username"
+                  autoComplete="username"
+                  disabled
                   required
                   fullWidth
-                  id="username"
-                  label="Username"
                   autoFocus
                   value={formData.username}
                   onChange={handleChange}
@@ -165,12 +161,12 @@ export default function Edit() {
               </Grid>
               <Grid item xs={12}>
                 <TextField
+                  id="email"
+                  name="email"
+                  label="Email Address"
+                  autoComplete="email"
                   required
                   fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
                   value={formData.email}
                   onChange={handleChange}
                 />
@@ -179,12 +175,12 @@ export default function Edit() {
                 <FormControl fullWidth>
                   <InputLabel id="role-label">Role</InputLabel>
                   <Select
-                    labelId="role-label"
                     id="role"
+                    name="role"
+                    labelId="role-label"
+                    label="Role"
                     required
                     fullWidth
-                    label="Role"
-                    name="role"
                     value={formData.role}
                     onChange={handleChange}
                   >
@@ -195,13 +191,13 @@ export default function Edit() {
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  required
-                  fullWidth
+                  id="password"
                   name="password"
                   label="Password"
                   type="password"
-                  id="password"
                   autoComplete="new-password"
+                  required
+                  fullWidth
                   value={formData.password}
                   onChange={handleChange}
                 />
@@ -209,8 +205,8 @@ export default function Edit() {
             </Grid>
             <Button
               type="submit"
-              fullWidth
               variant="contained"
+              fullWidth
               sx={{ mt: 3, mb: 2 }}
             >
               Edit
@@ -224,20 +220,14 @@ export default function Edit() {
             </Grid>
           </Box>
         </Box>
-        <Footer />
       </Container>
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      <Footer />
+      <AlertComponent
         open={open}
-        autoHideDuration={3000}
         onClose={handleAlertClose}
-      >
-        <Alert severity={alertSeverity} onClose={handleAlertClose}>
-          {alertMessage.map((message, index) => (
-            <div key={index}>{message}</div>
-          ))}
-        </Alert>
-      </Snackbar>
+        severity={alertSeverity}
+        messages={alertMessage}
+      />
     </ThemeProvider>
   );
 }

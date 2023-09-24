@@ -121,31 +121,31 @@ export default function Login() {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
-                  autoComplete="username"
+                  id="username"
                   name="username"
+                  label="Username"
+                  autoComplete="username"
                   required
                   fullWidth
-                  id="username"
-                  label="Username"
                   autoFocus
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
+                  id="password"
+                  name="password"
+                  type="password"
+                  label="Password"
+                  autoComplete="new-password"
                   required
                   fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
                 />
               </Grid>
             </Grid>
             <Button
               type="submit"
-              fullWidth
               variant="contained"
+              fullWidth
               sx={{ mt: 3, mb: 0 }}
             >
               Login

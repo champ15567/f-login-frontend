@@ -1,4 +1,4 @@
-import * as React from "react";
+//MUI
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -10,32 +10,23 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Footer from "./components/Footer";
+import { AlertProps } from "@mui/material/Alert";
+
+//React and Other
+import * as React from "react";
+import Footer from "../components/Footer";
 import axios from "axios";
-import Alert from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
+import AlertComponent from "../components/AlertComponent";
+import { ResData } from "../interfaces/ApiData";
 
 const defaultTheme = createTheme();
-export interface AlertSeverity {
-  success: string;
-  error: string;
-}
-export interface ResData {
-  status: string;
-  message: string;
-  token: string;
-  profile: {
-    username: string;
-    email: string;
-    role: string;
-  };
-}
 
 export default function Register() {
+  //Alert
   const [open, setOpen] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState<string[]>([]);
   const [alertSeverity, setAlertSeverity] =
-    React.useState<keyof AlertSeverity>("success");
+    React.useState<AlertProps["severity"]>("success");
   const handleAlertClose = () => {
     setOpen(false);
   };
@@ -48,6 +39,7 @@ export default function Register() {
       const email = data.get("email");
       const password = data.get("password");
 
+      //Validate Emply
       if (!username || !email || !password) {
         setAlertSeverity("error");
         setAlertMessage(["Please fill in all required fields."]);
@@ -73,9 +65,12 @@ export default function Register() {
       if (responseData.status === "ok") {
         localStorage.setItem("token", responseData.token);
         localStorage.setItem("profile", JSON.stringify(responseData.profile));
+
+        //Alert
         setAlertSeverity("success");
         setAlertMessage([responseData.message]);
         setOpen(true);
+
         setTimeout(() => {
           window.location.href = "/home";
         }, 500);
@@ -91,7 +86,7 @@ export default function Register() {
         setOpen(true);
       } else {
         setAlertSeverity("error");
-        setAlertMessage(error);
+        setAlertMessage([error.message]);
         setOpen(true);
       }
     }
@@ -124,41 +119,41 @@ export default function Register() {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
-                  autoComplete="username"
+                  id="username"
                   name="username"
+                  label="Username"
+                  autoComplete="username"
                   required
                   fullWidth
-                  id="username"
-                  label="Username"
                   autoFocus
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
+                  id="email"
+                  name="email"
+                  label="Email Address"
+                  autoComplete="email"
                   required
                   fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
+                  id="password"
+                  name="password"
+                  type="password"
+                  label="Password"
+                  autoComplete="new-password"
                   required
                   fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
                 />
               </Grid>
             </Grid>
             <Button
               type="submit"
-              fullWidth
               variant="contained"
+              fullWidth
               sx={{ mt: 3, mb: 2 }}
             >
               Register
@@ -174,18 +169,12 @@ export default function Register() {
         </Box>
         <Footer />
       </Container>
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      <AlertComponent
         open={open}
-        autoHideDuration={3000}
         onClose={handleAlertClose}
-      >
-        <Alert severity={alertSeverity} onClose={handleAlertClose}>
-          {alertMessage.map((message, index) => (
-            <div key={index}>{message}</div>
-          ))}
-        </Alert>
-      </Snackbar>
+        severity={alertSeverity}
+        messages={alertMessage}
+      />
     </ThemeProvider>
   );
 }
