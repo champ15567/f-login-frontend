@@ -19,7 +19,7 @@ const AlertComponent: React.FC<Props> = ({
     <Snackbar
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
       open={open}
-      autoHideDuration={1000}
+      autoHideDuration={1500}
       onClose={onClose}
     >
       <Alert severity={severity} onClose={onClose}>
